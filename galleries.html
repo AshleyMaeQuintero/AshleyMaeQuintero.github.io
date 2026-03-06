@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galleries — Ashley Quintero Photography</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off: #fafafa; --ink: #1c1c1c;
+      --mid: #6b6b6b; --border: #e0e0e0;
+      --rose: #d4607a; --rose-lt: #f5dde3;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', sans-serif; background: var(--white); color: var(--ink); overflow-x: hidden; cursor: none; }
+
+    .cursor { position: fixed; width: 8px; height: 8px; background: var(--rose); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); }
+    .cursor-ring { position: fixed; width: 30px; height: 30px; border: 1.5px solid var(--rose); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); opacity: 0.45; }
+
+    /* NAV */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 28px 56px; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a { font-size: 0.72rem; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mid); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--rose); }
+
+    /* PAGE HEADER */
+    .page-header { padding: 160px 56px 80px; border-bottom: 1px solid var(--border); }
+    .eyebrow { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; color: var(--rose); margin-bottom: 20px; display: block; }
+    .page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 5vw, 4.5rem); font-weight: 400; font-style: italic; color: var(--ink); line-height: 1.1; }
+    .page-header p { margin-top: 20px; font-size: 0.95rem; font-weight: 300; color: var(--mid); max-width: 480px; line-height: 1.8; }
+
+    /* FILTER TABS */
+    .filter-bar { padding: 40px 56px; display: flex; gap: 8px; border-bottom: 1px solid var(--border); }
+    .filter-btn { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; padding: 10px 24px; border: 1px solid var(--border); background: transparent; color: var(--mid); cursor: none; transition: all 0.2s; }
+    .filter-btn.active, .filter-btn:hover { background: var(--rose); color: white; border-color: var(--rose); }
+
+    /* GALLERY GRID */
+    .galleries-grid { padding: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+
+    .gallery-card { position: relative; overflow: hidden; aspect-ratio: 4/3; background: var(--off); cursor: none; }
+    .gallery-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.8s ease, filter 0.5s ease; filter: saturate(0.9); }
+    .gallery-card:hover img { transform: scale(1.05); filter: saturate(1.05) brightness(0.75); }
+
+    .gallery-card-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 36px 32px; opacity: 0; transition: opacity 0.4s ease; background: linear-gradient(to top, rgba(28,28,28,0.7) 0%, transparent 60%); }
+    .gallery-card:hover .gallery-card-overlay { opacity: 1; }
+    .gallery-card-meta { font-size: 0.63rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+    .gallery-card-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 400; font-style: italic; color: white; line-height: 1.2; margin-bottom: 16px; }
+    .gallery-card-link { display: inline-flex; align-items: center; gap: 8px; font-size: 0.65rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: white; text-decoration: none; }
+    .gallery-card-link .arr { display: inline-block; width: 24px; height: 1px; background: white; transition: width 0.3s; }
+    .gallery-card:hover .gallery-card-link .arr { width: 36px; }
+
+    /* ALWAYS-VISIBLE label (when not hovered) */
+    .gallery-card-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 28px 24px; background: linear-gradient(to top, rgba(255,255,255,1) 70%, transparent 100%); transition: opacity 0.3s; }
+    .gallery-card:hover .gallery-card-label { opacity: 0; }
+    .gallery-card-label span { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink); }
+    .gallery-card-label p { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 400; font-style: italic; color: var(--ink); margin-top: 4px; }
+
+    /* FEATURED — first card spans 2 cols */
+    .gallery-card.featured { grid-column: span 2; aspect-ratio: 16/9; }
+
+    /* LOAD MORE */
+    .load-more { padding: 64px 56px; text-align: center; border-top: 1px solid var(--border); }
+    .load-more p { font-size: 0.82rem; font-weight: 300; color: var(--mid); margin-bottom: 28px; }
+    .btn-outline { display: inline-block; padding: 14px 44px; border: 1px solid var(--ink); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); text-decoration: none; transition: background 0.3s, color 0.3s; cursor: none; }
+    .btn-outline:hover { background: var(--rose); border-color: var(--rose); color: white; }
+
+    /* FOOTER */
+    footer { background: var(--ink); padding: 56px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-logo { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: white; }
+    .footer-links { display: flex; gap: 32px; list-style: none; }
+    .footer-links a { font-size: 0.65rem; font-weight: 400; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.45); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--rose-lt); }
+    .footer-copy { font-size: 0.65rem; color: rgba(255,255,255,0.25); }
+
+    @media (max-width: 820px) {
+      nav { padding: 20px 24px; } .nav-links { display: none; }
+      .page-header { padding: 120px 24px 60px; }
+      .filter-bar { padding: 24px; flex-wrap: wrap; }
+      .galleries-grid { grid-template-columns: 1fr; padding: 24px; gap: 16px; }
+      .gallery-card.featured { grid-column: span 1; aspect-ratio: 4/3; }
+      .load-more { padding: 48px 24px; }
+      footer { flex-direction: column; gap: 28px; text-align: center; padding: 48px 24px; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Ashley Quintero</a>
+    <ul class="nav-links">
+      <li><a href="galleries.html" class="active">Galleries</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#services">Investment</a></li>
+      <li><a href="index.html#contact">Inquire</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <span class="eyebrow">Portfolio</span>
+    <h1>Every love story,<br/>beautifully kept.</h1>
+    <p>A collection of weddings, engagements, and portraits — each one completely its own.</p>
+  </header>
+
+  <div class="filter-bar">
+    <button class="filter-btn active">All</button>
+    <button class="filter-btn">Weddings</button>
+    <button class="filter-btn">Engagements</button>
+    <button class="filter-btn">Portraits</button>
+  </div>
+
+  <section class="galleries-grid">
+
+    <!-- Featured -->
+    <a href="gallery-mia-and-thomas.html" class="gallery-card featured">
+      <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=1200&q=80" alt="Mia & Thomas" />
+      <div class="gallery-card-overlay">
+        <span class="gallery-card-meta">Wedding · Napa Valley, CA</span>
+        <h2 class="gallery-card-title">Mia & Thomas</h2>
+        <span class="gallery-card-link">View gallery <span class="arr"></span></span>
+      </div>
+      <div class="gallery-card-label">
+        <span>Wedding · Napa Valley</span>
+        <p>Mia & Thomas</p>
+      </div>
+    </a>
+
+    <a href="gallery-sofia-and-luca.html" class="gallery-card">
+      <img src="https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800&q=80" alt="Sofia & Luca" />
+      <div class="gallery-card-overlay">
+        <span class="gallery-card-meta">Portrait · Big Sur, CA</span>
+        <h2 class="gallery-card-title">Sofia & Luca</h2>
+        <span class="gallery-card-link">View gallery <span class="arr"></span></span>
+      </div>
+      <div class="gallery-card-label">
+        <span>Portrait · Big Sur</span>
+        <p>Sofia & Luca</p>
+      </div>
+    </a>
+
+    <a href="gallery-claire-and-dominic.html" class="gallery-card">
+      <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80" alt="Claire & Dominic" />
+      <div class="gallery-card-overlay">
+        <span class="gallery-card-meta">Engagement · Malibu, CA</span>
+        <h2 class="gallery-card-title">Claire & Dominic</h2>
+        <span class="gallery-card-link">View gallery <span class="arr"></span></span>
+      </div>
+      <div class="gallery-card-label">
+        <span>Engagement · Malibu</span>
+        <p>Claire & Dominic</p>
+      </div>
+    </a>
+
+    <a href="gallery-maya-and-jordan.html" class="gallery-card">
+      <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80" alt="Maya & Jordan" />
+      <div class="gallery-card-overlay">
+        <span class="gallery-card-meta">Wedding · Ojai, CA</span>
+        <h2 class="gallery-card-title">Maya & Jordan</h2>
+        <span class="gallery-card-link">View gallery <span class="arr"></span></span>
+      </div>
+      <div class="gallery-card-label">
+        <span>Wedding · Ojai</span>
+        <p>Maya & Jordan</p>
+      </div>
+    </a>
+
+    <a href="gallery-elena-and-marcos.html" class="gallery-card">
+      <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&q=80" alt="Elena & Marcos" />
+      <div class="gallery-card-overlay">
+        <span class="gallery-card-meta">Wedding · Santa Barbara, CA</span>
+        <h2 class="gallery-card-title">Elena & Marcos</h2>
+        <span class="gallery-card-link">View gallery <span class="arr"></span></span>
+      </div>
+      <div class="gallery-card-label">
+        <span>Wedding · Santa Barbara</span>
+        <p>Elena & Marcos</p>
+      </div>
+    </a>
+
+    <a href="gallery-priya-and-sam.html" class="gallery-card">
+      <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=800&q=80" alt="Priya & Sam" />
+      <div class="gallery-card-overlay">
+        <span class="gallery-card-meta">Engagement · Joshua Tree, CA</span>
+        <h2 class="gallery-card-title">Priya & Sam</h2>
+        <span class="gallery-card-link">View gallery <span class="arr"></span></span>
+      </div>
+      <div class="gallery-card-label">
+        <span>Engagement · Joshua Tree</span>
+        <p>Priya & Sam</p>
+      </div>
+    </a>
+
+    <a href="gallery-nadia-and-felix.html" class="gallery-card">
+      <img src="https://images.unsplash.com/photo-1524863479829-916d8e77f114?w=800&q=80" alt="Nadia & Felix" />
+      <div class="gallery-card-overlay">
+        <span class="gallery-card-meta">Portrait · Yosemite, CA</span>
+        <h2 class="gallery-card-title">Nadia & Felix</h2>
+        <span class="gallery-card-link">View gallery <span class="arr"></span></span>
+      </div>
+      <div class="gallery-card-label">
+        <span>Portrait · Yosemite</span>
+        <p>Nadia & Felix</p>
+      </div>
+    </a>
+
+    <a href="gallery-remi-and-alex.html" class="gallery-card">
+      <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80" alt="Remi & Alex" />
+      <div class="gallery-card-overlay">
+        <span class="gallery-card-meta">Wedding · Carmel, CA</span>
+        <h2 class="gallery-card-title">Remi & Alex</h2>
+        <span class="gallery-card-link">View gallery <span class="arr"></span></span>
+      </div>
+      <div class="gallery-card-label">
+        <span>Wedding · Carmel</span>
+        <p>Remi & Alex</p>
+      </div>
+    </a>
+
+  </section>
+
+  <div class="load-more">
+    <p>Showing 8 of 24 galleries</p>
+    <a href="#" class="btn-outline">Load more</a>
+  </div>
+
+  <footer>
+    <div class="footer-logo">Ashley Quintero</div>
+    <ul class="footer-links">
+      <li><a href="galleries.html">Galleries</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#services">Investment</a></li>
+      <li><a href="index.html#contact">Inquire</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 Ashley Quintero Photography</p>
+  </footer>
+
+  <script>
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+    (function tick(){ cursor.style.left=mx+'px'; cursor.style.top=my+'px'; rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(tick); })();
+
+    // Filter tabs
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Scroll reveal
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if(e.isIntersecting){ e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.gallery-card').forEach((el,i) => {
+      el.style.opacity='0'; el.style.transform='translateY(20px)';
+      el.style.transition=`opacity 0.7s ease ${i*0.08}s, transform 0.7s ease ${i*0.08}s`;
+      obs.observe(el);
+    });
+  </script>
+</body>
+</html>
