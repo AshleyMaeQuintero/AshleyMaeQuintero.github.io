@@ -701,25 +701,37 @@
     <p class="footer-copy">© 2025 Ashley Quintero Photography</p>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-    
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
 
-    // Slideshow
-    const slides = document.querySelectorAll('.hero-slide');
-    let cur = 0;
-    setInterval(() => {
-      slides[cur].classList.remove('active');
-      cur = (cur + 1) % slides.length;
-      slides[cur].classList.add('active');
-    }, 4800);
+      // Slideshow
+      const slides = document.querySelectorAll('.hero-slide');
+      let cur = 0;
+      if (slides.length > 0) {
+        setInterval(() => {
+          slides[cur].classList.remove('active');
+          cur = (cur + 1) % slides.length;
+          slides[cur].classList.add('active');
+        }, 4800);
+      }
 
-    // Scroll reveal
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.style.opacity = '1';
-          e.target.style.transform = 'translateY(0)';
-        }
+      // Scroll reveal
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.intro-text, .about-text, .service-card, .testi-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(24px)';
+        el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        obs.observe(el);
       });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.intro-text, .about-text, .service-card, .test
+
+    });
+  </script>
+</body>
+</html>
